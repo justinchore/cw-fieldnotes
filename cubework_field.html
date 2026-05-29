@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Field Notes — Cubework</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --bg: #f2f4f2;
+  --surface: #ffffff;
+  --surface2: #eaf2eb;
+  --border: #d4e2d5;
+  --text: #0f1a10;
+  --text2: #516452;
+  --accent: #3ab54a;
+  --accent-light: #eaf7ec;
+  --tenant: #1a6b2a;
+  --tenant-light: #e6f5e9;
+  --green: #1a6b2a;
+  --green-light: #e6f5e9;
+  --tag-bg: #e2ede3;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* ── Header ── */
+.app-header {
+  background: #0f1a10;
+  color: #f0f7f0;
+  padding: 20px 20px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.app-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.app-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 1.25rem;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+}
+.app-title span { color: var(--accent); }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.header-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6a8a6b;
+}
+.header-icon-btn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 6px;
+  color: #c8bfb4;
+  font-size: 0.85rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.header-icon-btn:active { background: rgba(255,255,255,0.2); }
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 14px;
+}
+.tab {
+  flex: 1;
+  padding: 8px 4px;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #6a8a6b;
+  background: transparent;
+  border: none;
+  transition: all 0.15s;
+}
+.tab.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ── Content ── */
+.content { padding: 16px; }
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 12px;
+  transition: box-shadow 0.2s;
+}
+.card:active { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+.card-header {
+  padding: 14px 16px 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+}
+.card-name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+  flex: 1;
+}
+.card-address {
+  font-size: 0.75rem;
+  color: var(--text2);
+  margin-top: 3px;
+  font-style: italic;
+}
+.card-chevron {
+  font-size: 0.8rem;
+  color: var(--text2);
+  transition: transform 0.2s;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.card-chevron.open { transform: rotate(180deg); }
+.card-quick-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  transition: opacity 0.15s, background 0.15s;
+}
+.card-quick-btn:active { opacity: 1; }
+.card-quick-delete:active { background: #fdecea; }
+
+.card-tags {
+  padding: 0 16px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tag {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--tag-bg);
+  color: var(--text2);
+}
+.tag.tenant-tag { background: var(--tenant-light); color: var(--tenant); }
+
+.card-body {
+  display: none;
+  border-top: 1px solid var(--border);
+}
+.card-body.open { display: block; }
+
+.detail-section {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.detail-section:last-child { border-bottom: none; }
+.detail-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.spec-item { }
+.spec-key {
+  font-size: 0.65rem;
+  color: var(--text2);
+  margin-bottom: 2px;
+}
+.spec-val {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.spec-val.empty { color: var(--border); font-weight: 400; font-style: italic; font-family: 'Inter', sans-serif; font-size: 0.75rem; }
+
+.notes-text {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+.notes-text.empty { color: var(--text2); font-style: italic; font-size: 0.75rem; }
+
+/* ── Tenant sub-cards ── */
+.tenant-list { display: flex; flex-direction: column; gap: 8px; }
+.tenant-item {
+  background: var(--tenant-light);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.tenant-name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--tenant);
+}
+.tenant-meta {
+  font-size: 0.72rem;
+  color: #2a6b3a;
+  margin-top: 2px;
+  font-style: italic;
+}
+.tenant-notes {
+  font-size: 0.75rem;
+  color: var(--text);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.staff-item { background: var(--surface2); }
+.contact-badge {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 20px;
+}
+.badge-tenant { background: var(--tenant-light); color: var(--tenant); }
+.badge-staff { background: #e8f0e8; color: #3a5c3a; }
+
+/* ── Photo strip ── */
+.photo-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.photo-strip::-webkit-scrollbar { display: none; }
+.photo-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.photo-thumb-add {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  border: 1.5px dashed var(--border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 1.4rem;
+  background: var(--surface2);
+}
+
+/* ── Card actions ── */
+.card-actions {
+  padding: 10px 16px 14px;
+  display: flex;
+  gap: 8px;
+}
+.btn-sm {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-sm:active { opacity: 0.7; }
+.btn-edit { background: var(--surface2); color: var(--text); }
+.btn-tenant { background: var(--tenant-light); color: var(--tenant); }
+.btn-delete { background: #e6f5e9; color: #1a6b2a; }
+
+/* ── FAB ── */
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 1.6rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(200,68,10,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  transition: transform 0.15s;
+}
+.fab:active { transform: scale(0.93); }
+.fab.tenant-fab { background: var(--tenant); box-shadow: 0 4px 16px rgba(10,95,200,0.35); }
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26,23,20,0.6);
+  z-index: 300;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 0 0 32px;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(60px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.modal-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 14px auto 0;
+}
+.modal-header {
+  padding: 16px 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text2);
+}
+.modal-body { padding: 20px; }
+
+/* ── Form ── */
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+  appearance: none;
+}
+.form-input:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-textarea { resize: none; min-height: 90px; line-height: 1.5; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-section-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 20px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--accent-light);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.15s;
+}
+.btn-primary:active { opacity: 0.85; }
+.feature-toggles { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.feature-toggle-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.feature-toggle-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+.toggle-group {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  border-radius: 7px;
+  padding: 3px;
+}
+.toggle-opt {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 5px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text2);
+  transition: all 0.12s;
+}
+.toggle-opt.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.toggle-opt[data-val="yes"].active { background: var(--accent); color: #fff; }
+.toggle-opt[data-val="no"].active { background: #f0f0f0; color: #555; }
+
+.btn-primary.blue { background: var(--tenant); }
+
+.contact-type-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 4px;
+}
+.contact-type-btn {
+  flex: 1;
+  padding: 9px;
+  border: none;
+  border-radius: 7px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text2);
+  transition: all 0.15s;
+}
+.contact-type-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+/* ── Empty state ── */
+.empty-state {
+  text-align: center;
+  padding: 60px 24px;
+}
+.empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.empty-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+.empty-sub { font-size: 0.8rem; color: var(--text2); font-style: italic; line-height: 1.5; }
+
+/* ── Photo modal ── */
+.photo-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 400;
+  align-items: center;
+  justify-content: center;
+}
+.photo-modal.open { display: flex; }
+.photo-modal img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
+.photo-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="app-header">
+  <div class="app-header-top">
+    <div class="app-title">Field<span>Notes</span></div>
+    <div class="header-right">
+      <div id="saveIndicator" style="font-family:'Inter',sans-serif;font-size:0.65rem;font-weight:600;min-width:60px;text-align:right"></div>
+      <div class="header-count" id="headerCount">0 facilities</div>
+      <button class="header-icon-btn" onclick="exportData()" title="Export data">⬆</button>
+      <label class="header-icon-btn" title="Import data" style="cursor:pointer">
+        ⬇
+        <input type="file" accept=".json" style="display:none" onchange="importData(this)">
+      </label>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('facilities')">🏭 Facilities</button>
+    <button class="tab" onclick="switchTab('tenants')">👥 All Contacts</button>
+  </div>
+</div>
+
+<!-- Facilities Tab -->
+<div class="content" id="tab-facilities">
+  <div id="facilityList"></div>
+</div>
+
+<!-- Tenants Tab -->
+<div class="content" id="tab-tenants" style="display:none">
+  <div id="allTenantList"></div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay" style="position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+  <div style="font-size:2rem">🏭</div>
+  <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem">Loading facilities…</div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="mainFab" onclick="openModal('facility')">+</button>
+
+<!-- Facility Modal -->
+<div class="modal-overlay" id="facilityModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="facilityModalTitle">New Facility</div>
+      <button class="modal-close" onclick="closeModal('facility')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editFacilityId">
+
+      <div class="form-group">
+        <label class="form-label">Facility Name *</label>
+        <input class="form-input" id="f_name" placeholder="e.g. Cubework Compton" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input class="form-input" id="f_address" placeholder="Street address" autocomplete="off">
+      </div>
+
+      <div class="form-section-label">📐 Specs</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Sq Footage</label>
+          <input class="form-input" id="f_sqft" placeholder="e.g. 50,000" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Clear Height</label>
+          <input class="form-input" id="f_height" placeholder="e.g. 28 ft">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Dock Doors</label>
+          <input class="form-input" id="f_dock" placeholder="e.g. 4 dock-high" inputmode="text">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Power / Amps</label>
+          <input class="form-input" id="f_power" placeholder="e.g. 2000A 277/480V">
+        </div>
+      </div>
+
+      <div class="form-section-label">🛣️ Logistics</div>
+      <div class="form-group">
+        <label class="form-label">Nearby Freeways / Access</label>
+        <input class="form-input" id="f_freeways" placeholder="e.g. 5 min to I-710, near port">
+      </div>
+
+      <div class="form-section-label">📋 Lease &amp; Features</div>
+      <div class="form-group">
+        <label class="form-label">Lease End Date</label>
+        <input class="form-input" id="f_lease_end" placeholder="e.g. Dec 2026 or month-to-month">
+      </div>
+      <div class="feature-toggles">
+        <div class="feature-toggle-item">
+          <span class="feature-toggle-label">📷 AI Cameras</span>
+          <div class="toggle-group" id="tg-ai_cameras">
+            <button class="toggle-opt active" data-val="" onclick="setToggle('ai_cameras','')">—</button>
+            <button class="toggle-opt" data-val="yes" onclick="setToggle('ai_cameras','yes')">Yes</button>
+            <button class="toggle-opt" data-val="no" onclick="setToggle('ai_cameras','no')">No</button>
+          </div>
+          <input type="hidden" id="f_ai_cameras">
+        </div>
+        <div class="feature-toggle-item">
+          <span class="feature-toggle-label">❄️ Climate Control</span>
+          <div class="toggle-group" id="tg-climate">
+            <button class="toggle-opt active" data-val="" onclick="setToggle('climate','')">—</button>
+            <button class="toggle-opt" data-val="yes" onclick="setToggle('climate','yes')">Yes</button>
+            <button class="toggle-opt" data-val="no" onclick="setToggle('climate','no')">No</button>
+          </div>
+          <input type="hidden" id="f_climate">
+        </div>
+        <div class="feature-toggle-item">
+          <span class="feature-toggle-label">🔒 Fence/Partitions</span>
+          <div class="toggle-group" id="tg-fence">
+            <button class="toggle-opt active" data-val="" onclick="setToggle('fence','')">—</button>
+            <button class="toggle-opt" data-val="yes" onclick="setToggle('fence','yes')">Yes</button>
+            <button class="toggle-opt" data-val="no" onclick="setToggle('fence','no')">No</button>
+          </div>
+          <input type="hidden" id="f_fence">
+        </div>
+      </div>
+
+      <div class="form-section-label">📝 Notes</div>
+      <div class="form-group">
+        <label class="form-label">Observations &amp; Notes</label>
+        <textarea class="form-textarea" id="f_notes" placeholder="First impressions, layout notes, things to remember…"></textarea>
+      </div>
+
+      <button class="btn-primary" onclick="saveFacility()">Save Facility</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tenant Modal -->
+<div class="modal-overlay" id="tenantModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Log Contact</div>
+      <button class="modal-close" onclick="closeModal('tenant')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="tenantFacilityId">
+      <input type="hidden" id="editTenantId">
+
+      <!-- Type toggle -->
+      <div class="contact-type-toggle">
+        <button class="contact-type-btn active" id="typeBtn-tenant" onclick="setContactType('tenant')">🏢 Tenant</button>
+        <button class="contact-type-btn" id="typeBtn-staff" onclick="setContactType('staff')">👷 Staff</button>
+      </div>
+      <input type="hidden" id="t_type" value="tenant">
+
+      <div class="form-group">
+        <label class="form-label">Name *</label>
+        <input class="form-input" id="t_name" placeholder="Person's name" autocomplete="off">
+      </div>
+
+      <!-- Tenant-only fields -->
+      <div id="tenantFields">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Company</label>
+            <input class="form-input" id="t_company" placeholder="Business name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Role / Title</label>
+            <input class="form-input" id="t_role" placeholder="e.g. Owner">
+          </div>
+        </div>
+      </div>
+
+      <!-- Staff-only fields (hidden by default) -->
+      <div id="staffFields" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Role / Title</label>
+          <input class="form-input" id="t_staff_role" placeholder="e.g. Site Manager">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" id="t_phone" placeholder="(213) 555-0100" inputmode="tel">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="t_email" placeholder="name@company.com" inputmode="email">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="t_notes" placeholder="What did you talk about? Any follow-up needed?"></textarea>
+      </div>
+      <button class="btn-primary" onclick="saveTenant()">Save Contact</button>
+    </div>
+  </div>
+</div>
+
+<!-- Photo viewer -->
+<div class="photo-modal" id="photoModal" onclick="closePhotoModal()">
+  <button class="photo-modal-close">✕</button>
+  <img id="photoModalImg" src="" alt="">
+</div>
+
+<script>
+// ── Supabase ──
+const SB_URL = 'https://drbmaabfxdrmquxqnmlg.supabase.co';
+const SB_KEY = 'sb_publishable_EoRqOTY_R3T9-0OmZ0PlHA_zFrD5RDX';
+
+async function loadFromDB() {
+  const res = await fetch(`${SB_URL}/rest/v1/field_notes?id=eq.1&select=facilities`, {
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
+  });
+  if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+  const rows = await res.json();
+  return rows.length ? (rows[0].facilities || []) : [];
+}
+
+let saveTimer = null;
+function saveToDB(facilities) {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    setSaveIndicator('saving');
+    try {
+      const res = await fetch(`${SB_URL}/rest/v1/field_notes`, {
+        method: 'POST',
+        headers: {
+          apikey: SB_KEY,
+          Authorization: `Bearer ${SB_KEY}`,
+          'Content-Type': 'application/json',
+          Prefer: 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({ id: 1, facilities: JSON.parse(JSON.stringify(facilities)) })
+      });
+      if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+      setSaveIndicator('saved');
+    } catch(e) {
+      setSaveIndicator('error');
+      console.error('Save failed:', e);
+    }
+  }, 600);
+}
+
+function setSaveIndicator(state) {
+  const el = document.getElementById('saveIndicator');
+  if (!el) return;
+  const map = { saving: ['⟳ Saving…', '#888'], saved: ['✓ Saved', 'var(--accent)'], error: ['⚠ Save failed', '#c8220a'] };
+  const [text, color] = map[state] || ['', ''];
+  el.textContent = text;
+  el.style.color = color;
+  if (state === 'saved') setTimeout(() => { el.textContent = ''; }, 2000);
+}
+
+let facilities = [];
+let currentTab = 'facilities';
+let expandedCards = new Set();
+
+// ── Render ──
+function render() {
+  saveToDB(facilities);
+  const count = facilities.length;
+  document.getElementById('headerCount').textContent = count + ' facilit' + (count === 1 ? 'y' : 'ies');
+  renderFacilities();
+  renderAllTenants();
+}
+
+function renderFacilities() {
+  const el = document.getElementById('facilityList');
+  if (!facilities.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🏭</div><div class="empty-title">No facilities yet</div><div class="empty-sub">Tap + to add your first facility while you're studying or walking a site.</div></div>`;
+    return;
+  }
+  el.innerHTML = facilities.map(f => facilityCard(f)).join('');
+}
+
+function facilityCard(f) {
+  const open = expandedCards.has(f.id);
+  const tenantCount = (f.tenants||[]).length;
+  const tags = [];
+  if (f.sqft) tags.push(f.sqft + ' sf');
+  if (f.height) tags.push(f.height);
+  if (tenantCount) tags.push(`${tenantCount} contact${tenantCount>1?'s':''}`);
+
+  const photos = (f.photos||[]);
+
+  return `<div class="card" id="card-${f.id}">
+    <div class="card-header" onclick="toggleCard('${f.id}')">
+      <div>
+        <div class="card-name">${esc(f.name)}</div>
+        ${f.address ? `<div class="card-address">${esc(f.address)}</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <button class="card-quick-btn card-quick-delete" onclick="deleteFacility(event,'${f.id}')" title="Delete facility">🗑</button>
+        <div class="card-chevron ${open?'open':''}">▼</div>
+      </div>
+    </div>
+    ${tags.length ? `<div class="card-tags">${tags.map((t,i) => `<span class="tag ${i===tags.length-1&&tenantCount?'tenant-tag':''}">${esc(t)}</span>`).join('')}</div>` : ''}
+    <div class="card-body ${open?'open':''}">
+      <!-- Specs -->
+      <div class="detail-section">
+        <div class="detail-label">Specs</div>
+        <div class="detail-grid">
+          ${specItem('Sq Footage', f.sqft)}
+          ${specItem('Clear Height', f.height)}
+          ${specItem('Dock Doors', f.dock)}
+          ${specItem('Power', f.power)}
+          ${specItem('Lease End', f.lease_end)}
+        </div>
+        ${(f.ai_cameras||f.climate||f.fence) ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+          ${featureChip('📷 AI Cameras', f.ai_cameras)}
+          ${featureChip('❄️ Climate', f.climate)}
+          ${featureChip('🔒 Fence/Partitions', f.fence)}
+        </div>` : ''}
+      </div>
+      <!-- Logistics -->
+      <div class="detail-section">
+        <div class="detail-label">Logistics</div>
+        ${f.freeways ? `<div class="notes-text">${esc(f.freeways)}</div>` : `<div class="notes-text empty">No logistics notes yet</div>`}
+      </div>
+      <!-- Notes -->
+      <div class="detail-section">
+        <div class="detail-label">Observations</div>
+        ${f.notes ? `<div class="notes-text">${esc(f.notes)}</div>` : `<div class="notes-text empty">No notes yet</div>`}
+      </div>
+      <!-- Photos -->
+      <div class="detail-section">
+        <div class="detail-label">Photos</div>
+        <div class="photo-strip">
+          ${photos.map((p,i) => `<img class="photo-thumb" src="${p}" alt="photo" onclick="viewPhoto(event,'${f.id}',${i})">`).join('')}
+          <label class="photo-thumb-add" title="Add photo">
+            📷
+            <input type="file" accept="image/*" style="display:none" onchange="addPhoto('${f.id}', this)">
+          </label>
+        </div>
+      </div>
+      <!-- Tenants -->
+      <div class="detail-section">
+        <div class="detail-label">Contacts at this location</div>
+        ${renderTenants(f)}
+      </div>
+      <!-- Actions -->
+      <div class="card-actions">
+        <button class="btn-sm btn-edit" onclick="editFacility('${f.id}')">✏️ Edit</button>
+        <button class="btn-sm btn-tenant" onclick="openTenantModal('${f.id}')">👤 Add Contact</button>
+        <button class="btn-sm btn-delete" onclick="deleteFacility(event,'${f.id}')">🗑</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function specItem(label, val) {
+  return `<div class="spec-item"><div class="spec-key">${label}</div><div class="spec-val ${val?'':'empty'}">${val ? esc(val) : '—'}</div></div>`;
+}
+
+function featureChip(label, val) {
+  if (!val) return '';
+  const yes = val === 'yes';
+  return `<span style="font-family:'Inter',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:${yes?'var(--accent-light)':'#f0f0f0'};color:${yes?'var(--accent)':'#777'}">${esc(label)}: ${yes?'Yes':'No'}</span>`;
+}
+
+function renderTenants(f) {
+  const tenants = f.tenants || [];
+  if (!tenants.length) return `<div class="notes-text empty">No contacts logged yet — tap 👤 Add Contact below</div>`;
+  return `<div class="tenant-list">${tenants.map(t => {
+    const isStaff = t.type === 'staff';
+    return `
+    <div class="tenant-item ${isStaff?'staff-item':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="tenant-name">${esc(t.name)}</div>
+            <span class="contact-badge ${isStaff?'badge-staff':'badge-tenant'}">${isStaff?'Staff':'Tenant'}</span>
+          </div>
+          ${t.company ? `<div class="tenant-meta">🏢 ${esc(t.company)}</div>` : ''}
+          ${t.role ? `<div class="tenant-meta">${esc(t.role)}</div>` : ''}
+          ${t.phone ? `<div class="tenant-meta" style="margin-top:4px">📞 ${esc(t.phone)}</div>` : ''}
+          ${t.email ? `<div class="tenant-meta">✉️ ${esc(t.email)}</div>` : ''}
+          ${t.notes ? `<div class="tenant-notes">${esc(t.notes)}</div>` : ''}
+        </div>
+        <button style="background:none;border:none;color:#c8220a;font-size:1rem;cursor:pointer;padding:0 0 0 8px;flex-shrink:0" onclick="deleteTenant('${f.id}','${t.id}')">✕</button>
+      </div>
+    </div>`}).join('')}</div>`;
+}
+
+function renderAllTenants() {
+  const el = document.getElementById('allTenantList');
+  const all = [];
+  facilities.forEach(f => (f.tenants||[]).forEach(t => all.push({...t, facilityName: f.name, facilityId: f.id})));
+  if (!all.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">No contacts yet</div><div class="empty-sub">Log people you meet at facilities — tenants, managers, anyone worth remembering.</div></div>`;
+    return;
+  }
+  el.innerHTML = all.map(t => `
+    <div class="card" style="margin-bottom:10px">
+      <div style="padding:14px 16px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="card-name" style="color:var(--tenant)">${esc(t.name)}</div>
+            ${t.company||t.role ? `<div class="card-address">${[t.role,t.company].filter(Boolean).map(esc).join(' · ')}</div>` : ''}
+            <div style="margin-top:4px;font-size:0.7rem;color:var(--text2)">📍 ${esc(t.facilityName)}</div>
+            ${t.phone ? `<div style="font-size:0.72rem;color:var(--text2);margin-top:3px">📞 ${esc(t.phone)}</div>` : ''}
+            ${t.email ? `<div style="font-size:0.72rem;color:var(--text2)">✉️ ${esc(t.email)}</div>` : ''}
+            ${t.notes ? `<div class="tenant-notes" style="margin-top:8px">${esc(t.notes)}</div>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Toggle card ──
+function toggleCard(id) {
+  if (expandedCards.has(id)) expandedCards.delete(id);
+  else expandedCards.add(id);
+  render();
+}
+
+// ── Modals ──
+function openModal(type) {
+  if (type === 'facility') {
+    document.getElementById('facilityModalTitle').textContent = 'New Facility';
+    document.getElementById('editFacilityId').value = '';
+    ['name','address','sqft','height','dock','power','freeways','notes','lease_end'].forEach(k => document.getElementById('f_'+k).value = '');
+    resetToggles(null);
+  }
+  document.getElementById(type+'Modal').classList.add('open');
+}
+function closeModal(type) {
+  document.getElementById(type+'Modal').classList.remove('open');
+}
+
+function openTenantModal(facilityId) {
+  document.getElementById('tenantFacilityId').value = facilityId;
+  document.getElementById('editTenantId').value = '';
+  ['name','company','role','staff_role','phone','email','notes'].forEach(k => {
+    const el = document.getElementById('t_'+k);
+    if (el) el.value = '';
+  });
+  setContactType('tenant');
+  document.getElementById('tenantModal').classList.add('open');
+}
+
+function setContactType(type) {
+  document.getElementById('t_type').value = type;
+  document.getElementById('tenantFields').style.display = type === 'tenant' ? '' : 'none';
+  document.getElementById('staffFields').style.display = type === 'staff' ? '' : 'none';
+  document.getElementById('typeBtn-tenant').classList.toggle('active', type === 'tenant');
+  document.getElementById('typeBtn-staff').classList.toggle('active', type === 'staff');
+}
+
+// ── Save facility ──
+function saveFacility() {
+  const name = document.getElementById('f_name').value.trim();
+  if (!name) { alert('Please enter a facility name.'); return; }
+  const editId = document.getElementById('editFacilityId').value;
+  const data = {
+    name, 
+    address: v('f_address'), sqft: v('f_sqft'), height: v('f_height'),
+    dock: v('f_dock'), power: v('f_power'), freeways: v('f_freeways'), notes: v('f_notes'),
+    lease_end: v('f_lease_end'),
+    ai_cameras: document.getElementById('f_ai_cameras').value,
+    climate: document.getElementById('f_climate').value,
+    fence: document.getElementById('f_fence').value
+  };
+  if (editId) {
+    const idx = facilities.findIndex(f => f.id === editId);
+    if (idx > -1) facilities[idx] = {...facilities[idx], ...data};
+  } else {
+    facilities.unshift({...data, id: uid(), tenants: [], photos: [], createdAt: Date.now()});
+  }
+  closeModal('facility');
+  render();
+}
+
+// ── Save tenant ──
+function saveTenant() {
+  const name = document.getElementById('t_name').value.trim();
+  if (!name) { alert('Please enter a name.'); return; }
+  const fId = document.getElementById('tenantFacilityId').value;
+  const f = facilities.find(x => x.id === fId);
+  if (!f) return;
+  if (!f.tenants) f.tenants = [];
+  const type = document.getElementById('t_type').value;
+  const role = type === 'staff' ? v('t_staff_role') : v('t_role');
+  f.tenants.unshift({
+    id: uid(), name, type,
+    company: type === 'tenant' ? v('t_company') : '',
+    role,
+    phone: v('t_phone'), email: v('t_email'), notes: v('t_notes'),
+    createdAt: Date.now()
+  });
+  expandedCards.add(fId);
+  closeModal('tenant');
+  render();
+}
+
+// ── Edit facility ──
+function editFacility(id) {
+  const f = facilities.find(x => x.id === id);
+  if (!f) return;
+  document.getElementById('facilityModalTitle').textContent = 'Edit Facility';
+  document.getElementById('editFacilityId').value = id;
+  ['name','address','sqft','height','dock','power','freeways','notes','lease_end'].forEach(k => {
+    document.getElementById('f_'+k).value = f[k] || '';
+  });
+  resetToggles(f);
+  document.getElementById('facilityModal').classList.add('open');
+}
+
+// ── Delete ──
+const pendingDelete = new Set();
+
+function deleteFacility(evt, id) {
+  evt.stopPropagation();
+  const btn = evt.currentTarget;
+  if (pendingDelete.has(id)) {
+    pendingDelete.delete(id);
+    facilities = facilities.filter(f => f.id !== id);
+    expandedCards.delete(id);
+    render();
+  } else {
+    pendingDelete.add(id);
+    btn.textContent = '✓?';
+    btn.style.opacity = '1';
+    btn.style.background = '#fdecea';
+    btn.style.color = '#c8220a';
+    setTimeout(() => {
+      pendingDelete.delete(id);
+      if (btn) { btn.textContent = '🗑'; btn.style.background = ''; btn.style.color = ''; btn.style.opacity = ''; }
+    }, 2500);
+  }
+}
+function deleteTenant(fId, tId) {
+  const f = facilities.find(x => x.id === fId);
+  if (!f) return;
+  f.tenants = (f.tenants||[]).filter(t => t.id !== tId);
+  render();
+}
+
+// ── Photos ──
+function addPhoto(facilityId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const f = facilities.find(x => x.id === facilityId);
+    if (!f) return;
+    if (!f.photos) f.photos = [];
+    f.photos.push(e.target.result);
+    render();
+  };
+  reader.readAsDataURL(file);
+}
+function viewPhoto(evt, facilityId, idx) {
+  evt.stopPropagation();
+  const f = facilities.find(x => x.id === facilityId);
+  if (!f || !f.photos[idx]) return;
+  document.getElementById('photoModalImg').src = f.photos[idx];
+  document.getElementById('photoModal').classList.add('open');
+}
+function closePhotoModal() {
+  document.getElementById('photoModal').classList.remove('open');
+}
+
+// ── Tabs ──
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='facilities')||(i===1&&tab==='tenants')));
+  document.getElementById('tab-facilities').style.display = tab === 'facilities' ? '' : 'none';
+  document.getElementById('tab-tenants').style.display = tab === 'tenants' ? '' : 'none';
+  const fab = document.getElementById('mainFab');
+  if (tab === 'facilities') {
+    fab.textContent = '+';
+    fab.style.display = '';  fab.className = 'fab';
+    fab.onclick = () => openModal('facility');
+  } else {
+    fab.style.display = 'none';
+  }
+}
+
+function setToggle(field, val) {
+  document.getElementById('f_'+field).value = val;
+  document.querySelectorAll(`#tg-${field} .toggle-opt`).forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.val === val);
+  });
+}
+
+function resetToggles(f) {
+  ['ai_cameras','climate','fence'].forEach(field => {
+    const val = f ? (f[field] || '') : '';
+    setToggle(field, val);
+  });
+}
+function exportData() {
+  const json = JSON.stringify(facilities, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cubework_field_notes.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error('Invalid format');
+      if (confirm(`Import ${data.length} facilit${data.length===1?'y':'ies'}? This will replace your current data.`)) {
+        facilities = data;
+        render();
+      }
+    } catch(err) {
+      alert("Couldn't read file — make sure it's a valid Field Notes export.");
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ── Helpers ──
+function v(id) { return document.getElementById(id).value.trim(); }
+function uid() { return Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
+function esc(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Close modals on overlay click
+document.getElementById('facilityModal').addEventListener('click', function(e){ if(e.target===this) closeModal('facility'); });
+document.getElementById('tenantModal').addEventListener('click', function(e){ if(e.target===this) closeModal('tenant'); });
+
+// Boot
+(async () => {
+  const overlay = document.getElementById('loadingOverlay');
+  try {
+    facilities = await loadFromDB();
+    overlay.style.display = 'none';
+    render();
+  } catch(e) {
+    overlay.innerHTML = `<div style="text-align:center;padding:40px 24px"><div style="font-size:2rem;margin-bottom:12px">⚠️</div><div style="font-family:'Inter',sans-serif;font-weight:700;margin-bottom:8px">Couldn't connect</div><div style="font-size:0.8rem;color:#888;margin-bottom:20px">${e.message}</div><button onclick="location.reload()" style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-family:'Inter',sans-serif;font-weight:700;cursor:pointer">Retry</button></div>`;
+  }
+})();
+</script>
+</body>
+</html>
