@@ -285,14 +285,36 @@ body {
   scrollbar-width: none;
 }
 .photo-strip::-webkit-scrollbar { display: none; }
+.photo-thumb-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
 .photo-thumb {
   width: 72px;
   height: 72px;
   border-radius: 8px;
   object-fit: cover;
-  flex-shrink: 0;
+  display: block;
   border: 1px solid var(--border);
   cursor: pointer;
+}
+.photo-delete-btn {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  background: rgba(0,0,0,0.55);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.55rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 .photo-thumb-add {
   width: 72px;
@@ -702,6 +724,15 @@ body {
           </div>
           <input type="hidden" id="f_fence">
         </div>
+        <div class="feature-toggle-item">
+          <span class="feature-toggle-label">💳 Card Reader</span>
+          <div class="toggle-group" id="tg-card_reader">
+            <button class="toggle-opt active" data-val="" onclick="setToggle('card_reader','')">—</button>
+            <button class="toggle-opt" data-val="yes" onclick="setToggle('card_reader','yes')">Yes</button>
+            <button class="toggle-opt" data-val="no" onclick="setToggle('card_reader','no')">No</button>
+          </div>
+          <input type="hidden" id="f_card_reader">
+        </div>
       </div>
 
       <div class="form-section-label">📝 Notes</div>
@@ -890,10 +921,11 @@ function facilityCard(f) {
           ${specItem('Power', f.power)}
           ${specItem('Lease End', f.lease_end)}
         </div>
-        ${(f.ai_cameras||f.climate||f.fence) ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+        ${(f.ai_cameras||f.climate||f.fence||f.card_reader) ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
           ${featureChip('📷 AI Cameras', f.ai_cameras)}
           ${featureChip('❄️ Climate', f.climate)}
           ${featureChip('🔒 Fence/Partitions', f.fence)}
+          ${featureChip('💳 Card Reader', f.card_reader)}
         </div>` : ''}
       </div>
       <!-- Logistics -->
@@ -910,10 +942,10 @@ function facilityCard(f) {
       <div class="detail-section">
         <div class="detail-label">Photos</div>
         <div class="photo-strip">
-          ${photos.map((p,i) => `<img class="photo-thumb" src="${p}" alt="photo" onclick="viewPhoto(event,'${f.id}',${i})">`).join('')}
+          ${photos.map((p,i) => `<div class="photo-thumb-wrapper"><img class="photo-thumb" src="${p}" alt="photo" onclick="viewPhoto(event,'${f.id}',${i})"><button class="photo-delete-btn" onclick="deletePhoto(event,'${f.id}',${i})">✕</button></div>`).join('')}
           <label class="photo-thumb-add" title="Add photo">
             📷
-            <input type="file" accept="image/*" style="display:none" onchange="addPhoto('${f.id}', this)">
+            <input type="file" accept="image/*" capture="environment" style="display:none" onchange="addPhoto('${f.id}', this)">
           </label>
         </div>
       </div>
@@ -1043,7 +1075,8 @@ function saveFacility() {
     lease_end: v('f_lease_end'),
     ai_cameras: document.getElementById('f_ai_cameras').value,
     climate: document.getElementById('f_climate').value,
-    fence: document.getElementById('f_fence').value
+    fence: document.getElementById('f_fence').value,
+    card_reader: document.getElementById('f_card_reader').value
   };
   if (editId) {
     const idx = facilities.findIndex(f => f.id === editId);
@@ -1121,18 +1154,72 @@ function deleteTenant(fId, tId) {
 }
 
 // ── Photos ──
-function addPhoto(facilityId, input) {
+function compressImage(file, maxDim = 1280, quality = 0.75) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(blob => resolve(blob), 'image/jpeg', quality);
+    };
+    img.src = url;
+  });
+}
+
+async function addPhoto(facilityId, input) {
   const file = input.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const f = facilities.find(x => x.id === facilityId);
-    if (!f) return;
+  input.value = '';
+  const f = facilities.find(x => x.id === facilityId);
+  if (!f) return;
+  setSaveIndicator('saving');
+  try {
+    const blob = await compressImage(file);
+    const path = `${facilityId}/${Date.now()}-${uid()}.jpg`;
+    const res = await fetch(`${SB_URL}/storage/v1/object/facility-photos/${path}`, {
+      method: 'POST',
+      headers: {
+        apikey: SB_KEY,
+        Authorization: `Bearer ${SB_KEY}`,
+        'Content-Type': 'image/jpeg'
+      },
+      body: blob
+    });
+    if (!res.ok) throw new Error(`Upload failed: ${res.status} ${await res.text()}`);
+    const publicUrl = `${SB_URL}/storage/v1/object/public/facility-photos/${path}`;
     if (!f.photos) f.photos = [];
-    f.photos.push(e.target.result);
+    f.photos.push(publicUrl);
     render();
-  };
-  reader.readAsDataURL(file);
+  } catch(e) {
+    setSaveIndicator('error');
+    alert('Photo upload failed: ' + e.message);
+  }
+}
+
+async function deletePhoto(evt, facilityId, idx) {
+  evt.stopPropagation();
+  const f = facilities.find(x => x.id === facilityId);
+  if (!f || !f.photos) return;
+  const url = f.photos[idx];
+  const marker = '/facility-photos/';
+  const path = url && url.includes(marker) ? url.split(marker)[1] : null;
+  if (path) {
+    try {
+      await fetch(`${SB_URL}/storage/v1/object/facility-photos/${path}`, {
+        method: 'DELETE',
+        headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
+      });
+    } catch(e) {
+      console.warn('Storage delete failed:', e);
+    }
+  }
+  f.photos.splice(idx, 1);
+  render();
 }
 function viewPhoto(evt, facilityId, idx) {
   evt.stopPropagation();
@@ -1169,7 +1256,7 @@ function setToggle(field, val) {
 }
 
 function resetToggles(f) {
-  ['ai_cameras','climate','fence'].forEach(field => {
+  ['ai_cameras','climate','fence','card_reader'].forEach(field => {
     const val = f ? (f[field] || '') : '';
     setToggle(field, val);
   });
